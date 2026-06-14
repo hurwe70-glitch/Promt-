@@ -1,0 +1,1112 @@
+```html
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>معرض حُر للبرومتات السينمائية</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cinemaDark: '#0a0a0c', // أسود تيتانيوم عميق جداً
+                        cinemaCard: '#121216', // رمادي فحمي دافئ للبطاقات
+                        cinemaGold: '#d4af37', // ذهبي شامبانيا فاخر ومطفي
+                        cinemaMuted: '#8e8e93', // رمادي ناعم للنصوص الثانوية
+                    },
+                    boxShadow: {
+                        'cinema-premium': '0 20px 40px rgba(0, 0, 0, 0.6)',
+                        'cinema-gold-glow': '0 0 20px rgba(212, 175, 55, 0.1)',
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts: Tajawal -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: #0a0a0c;
+            /* حماية الخصوصية: منع تحديد النصوص والنسخ واللصق اليدوي */
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            /* منع زوم المتصفح على الجوال */
+            touch-action: manipulation;
+            overflow-x: hidden;
+            letter-spacing: -0.01em;
+        }
+
+        /* منع سحب الصور لتعزيز المظهر السينمائي كمعرض حقيقي */
+        img {
+            -webkit-user-drag: none;
+            user-drag: none;
+        }
+
+        /* تخصيص شريط التمرير السينمائي الرفيع */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0a0c;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d4af37;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ffffff;
+        }
+    </style>
+</head>
+<body class="text-slate-200 min-h-screen pb-12 flex flex-col justify-between">
+
+    <!-- خلفية ناعمة خافتة لمحاكاة إضاءة شاشات السينما -->
+    <div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+        <div class="absolute top-0 right-1/4 w-[600px] h-[600px] rounded-full bg-cinemaGold/3 blur-[180px]"></div>
+    </div>
+
+    <!-- الترويسة الرئيسية الفاخرة -->
+    <header class="sticky top-0 z-40 backdrop-blur-lg bg-cinemaDark/90 border-b border-white/5 px-4 py-4 md:px-6">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <!-- الشعار السينمائي البسيط -->
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full border border-cinemaGold/40 flex items-center justify-center bg-cinemaCard/50">
+                    <span class="text-cinemaGold text-lg font-light tracking-widest">H</span>
+                </div>
+                <div>
+                    <h1 class="text-base md:text-lg font-bold tracking-wide text-white flex items-center gap-1.5">
+                        لوحة برومتات حُر 
+                        <span class="text-[9px] px-1.5 py-0.5 rounded border border-cinemaGold/25 text-cinemaGold font-normal">سينمائي</span>
+                    </h1>
+                    <p class="text-[9px] text-cinemaMuted font-light">مكتبة حفظ وتنسيق النصوص والسيناريوهات الإبداعية</p>
+                </div>
+            </div>
+
+            <!-- أزرار الإدارة ولوحة التحكم والدليل التعليمي -->
+            <div class="flex items-center gap-2">
+                <!-- زر الدليل التعليمي التفاعلي -->
+                <button onclick="openTutorialModal()" class="px-3 py-1.5 rounded-lg bg-cinemaCard border border-cinemaGold/30 text-cinemaGold text-xs font-semibold hover:bg-cinemaGold hover:text-cinemaDark transition-all duration-300 active:scale-95 flex items-center gap-1 shadow-cinema-gold-glow">
+                    <span>دليل التوليد 📖</span>
+                </button>
+
+                <button id="authBtn" onclick="openLoginModal()" class="px-3 py-1.5 rounded-lg bg-transparent border border-white/10 text-slate-300 text-xs font-medium hover:border-cinemaGold hover:text-cinemaGold transition-all duration-300 active:scale-95">
+                    <span id="authBtnText">دخول المخرج</span>
+                </button>
+
+                <button id="addBtn" onclick="openAddModal()" class="hidden px-4 py-1.5 rounded-lg bg-cinemaGold text-cinemaDark text-xs font-bold hover:bg-white transition-all duration-300 active:scale-95 shadow-lg">
+                    إضافة لقطة
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- المحتوى الرئيسي للموقع -->
+    <main class="max-w-6xl w-full mx-auto px-4 md:px-6 py-6 flex-grow">
+        
+        <!-- لوحة التحكم الإحصائية الخاصة بالمخرج (تظهر فقط للمخرج حُر عند تسجيل الدخول) -->
+        <section id="adminStatsPanel" class="hidden mb-8 p-6 bg-cinemaCard border border-cinemaGold/20 rounded-2xl shadow-cinema-gold-glow">
+            <div class="flex items-center justify-between mb-4 pb-3 border-b border-white/5">
+                <h2 class="text-sm font-bold text-cinemaGold tracking-wider uppercase">لوحة تحكم وإحصائيات المعرض</h2>
+                <span class="text-[10px] text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">متصل سحابياً</span>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <!-- إحصائية عدد الزوار والزيارات الفعلي -->
+                <div class="bg-black/40 p-4 rounded-xl border border-white/5 text-center">
+                    <p class="text-xs text-cinemaMuted mb-1 font-medium">إجمالي زيارات الموقع</p>
+                    <span id="statViewsCount" class="text-2xl font-black text-white font-mono">0</span>
+                </div>
+                <!-- إحصائية عدد البرومتات المسجلة -->
+                <div class="bg-black/40 p-4 rounded-xl border border-white/5 text-center">
+                    <p class="text-xs text-cinemaMuted mb-1 font-medium">عدد اللقطات الحالية</p>
+                    <span id="statPromptsCount" class="text-2xl font-black text-cinemaGold font-mono">0</span>
+                </div>
+                <!-- إرشاد سريع للمخرج -->
+                <div class="hidden md:flex bg-black/20 p-4 rounded-xl border border-white/5 flex-col justify-center items-center text-center">
+                    <p class="text-[10px] text-cinemaMuted leading-relaxed">البيانات تُحدّث تلقائياً وفورياً بمجرد دخول أي زائر جديد للمعرض.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- شريط البحث الفخم والمبسط -->
+        <div class="mb-8 relative">
+            <input type="text" id="searchInput" oninput="filterPrompts()" placeholder="البحث في الأرشيف السينمائي للبرومتات..." class="w-full bg-cinemaCard border border-white/5 rounded-xl py-4 px-12 text-slate-100 placeholder-slate-600 focus:outline-none focus:border-cinemaGold transition-all duration-300 text-sm">
+            <div class="absolute right-4 top-4.5 text-cinemaMuted">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.637 10.637z" />
+                </svg>
+            </div>
+        </div>
+
+        <!-- حالة الدخول كأدمن ناعمة -->
+        <div class="mb-4 flex justify-end">
+            <span id="adminBadge" class="hidden px-3 py-1 rounded-full text-[9px] font-bold bg-cinemaGold/10 text-cinemaGold border border-cinemaGold/20 tracking-wider">
+                وضع المخرج نشط
+            </span>
+        </div>
+
+        <!-- مؤشر تحميل البيانات من السيرفر -->
+        <div id="loadingState" class="flex flex-col items-center justify-center py-24">
+            <div class="w-8 h-8 border-2 border-cinemaGold border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-[11px] text-cinemaMuted mt-4 tracking-widest uppercase">جاري جلب الأرشيف الإبداعي من السحاب...</p>
+        </div>
+
+        <!-- شبكة عرض اللقطات الإبداعية (البرومتات) -->
+        <div id="promptsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 hidden">
+            <!-- يتم تعبئة اللقطات ديناميكياً -->
+        </div>
+
+        <!-- في حال عدم وجود نتائج للبحث -->
+        <div id="noResults" class="hidden text-center py-20">
+            <p class="text-cinemaMuted font-light text-base mb-2">لا توجد أعمال فنية تطابق معايير بحثك</p>
+            <p class="text-[11px] text-cinemaGold uppercase tracking-widest">قم بإضافة لقطات جديدة من لوحة التحكم</p>
+        </div>
+    </main>
+
+    <!-- لوحة الدليل التعليمي المخصصة لتطبيقات الذكاء الاصطناعي (ChatGPT / Gemini) -->
+    <div id="tutorialModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-cinemaDark/95 backdrop-blur-md hidden transition-all duration-300">
+        <div class="absolute inset-0" onclick="closeTutorialModal()"></div>
+        <div class="relative w-full max-w-2xl bg-cinemaCard border border-cinemaGold/20 rounded-2xl p-6 md:p-8 shadow-cinema-premium transform scale-95 opacity-0 transition-all duration-300 max-h-[90vh] overflow-y-auto" id="tutorialModalContent">
+            
+            <!-- رأس لوحة التعليمات -->
+            <div class="flex items-center justify-between mb-6 pb-4 border-b border-white/5">
+                <div class="flex items-center gap-2 text-cinemaGold">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+                    </svg>
+                    <h3 class="text-base md:text-lg font-bold text-white">دليل دمج وتوليد ملامحك مع البرومت السينمائي</h3>
+                </div>
+                <button onclick="closeTutorialModal()" class="text-cinemaMuted hover:text-white transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- محتوى خطوات الدليل التفاعلي المبسط -->
+            <div class="space-y-6 text-right">
+                
+                <!-- الخطوة الأولى -->
+                <div class="flex items-start gap-4">
+                    <div class="w-8 h-8 rounded-full bg-cinemaGold/10 border border-cinemaGold/30 flex items-center justify-center text-cinemaGold text-xs font-bold shrink-0">1</div>
+                    <div class="space-y-1">
+                        <h4 class="text-sm font-bold text-white">انسخ كود اللقطة البرمجي</h4>
+                        <p class="text-xs text-cinemaMuted">اختر المشهد الذي تريده من معرضنا واضغط على زر <span class="text-cinemaGold font-semibold">"نسخ اللقطة"</span> ليتم نسخ البرومت الإنجليزي الذكي الخاص بالمشهد فوراً إلى حافظة جهازك.</p>
+                    </div>
+                </div>
+
+                <!-- الخطوة الثانية -->
+                <div class="flex items-start gap-4">
+                    <div class="w-8 h-8 rounded-full bg-cinemaGold/10 border border-cinemaGold/30 flex items-center justify-center text-cinemaGold text-xs font-bold shrink-0">2</div>
+                    <div class="space-y-1">
+                        <h4 class="text-sm font-bold text-white">افتح تطبيق ChatGPT أو Gemini</h4>
+                        <p class="text-xs text-cinemaMuted">توجه إلى المتصفح أو التطبيق الرسمي لـ <span class="text-white font-medium">ChatGPT</span> (مع تفعيل طراز GPT-4o أو DALL-E 3) أو تطبيق <span class="text-white font-medium">Gemini Advanced</span>.</p>
+                    </div>
+                </div>
+
+                <!-- الخطوة الثالثة -->
+                <div class="flex items-start gap-4">
+                    <div class="w-8 h-8 rounded-full bg-cinemaGold/10 border border-cinemaGold/30 flex items-center justify-center text-cinemaGold text-xs font-bold shrink-0">3</div>
+                    <div class="space-y-1">
+                        <h4 class="text-sm font-bold text-white">ارفع صورتك الشخصية (ألبوم الاستوديو)</h4>
+                        <p class="text-xs text-cinemaMuted">اضغط على علامة المشبك أو الرمز <span class="text-cinemaGold font-bold">(+)</span> داخل مربع الدردشة بالذكاء الاصطناعي، وارفع صورتك الشخصية بملامح واضحة وإضاءة جيدة لتكون هي المرجع الأساسي لوجهك.</p>
+                    </div>
+                </div>
+
+                <!-- الخطوة الرابعة والسرية لدمج الملامح -->
+                <div class="flex items-start gap-4">
+                    <div class="w-8 h-8 rounded-full bg-cinemaGold/10 border border-cinemaGold/30 flex items-center justify-center text-cinemaGold text-xs font-bold shrink-0">4</div>
+                    <div class="space-y-2">
+                        <h4 class="text-sm font-bold text-white">اكتب الأمر السحري والصق البرومت</h4>
+                        <p class="text-xs text-cinemaMuted">اكتب الصيغة التالية باللغة العربية للذكاء الاصطناعي متبوعة بالبرومت المنسوخ:</p>
+                        
+                        <!-- صندوق نسخ الأمر المساعد الجاهز -->
+                        <div class="bg-black/60 p-3 rounded-lg border border-white/5 relative">
+                            <p class="text-[11px] text-slate-300 leading-relaxed leading-5">
+"باستخدام هذه الصورة المرفقة كمرجع أساسي للملامح والهوية، والقصة، وبنية الشعر ولون البشرة والمظهر العام بدقة فائقة. يرجى محاكاتها وتوليد لقطة جديدة تماماً بموجب الوصف البرمجي التالي: 
+[ألصق هنا البرومت الذي نسخته من التطبيق]"
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- الخطوة الخامسة والنهائية -->
+                <div class="flex items-start gap-4">
+                    <div class="w-8 h-8 rounded-full bg-cinemaGold/10 border border-cinemaGold/30 flex items-center justify-center text-cinemaGold text-xs font-bold shrink-0">5</div>
+                    <div class="space-y-1">
+                        <h4 class="text-sm font-bold text-white">أرسل الطلب واحصل على النتيجة</h4>
+                        <p class="text-xs text-cinemaMuted">اضغط إرسال وسيقوم محرك توليد الصور المدمج في ChatGPT أو Gemini بدمج وجهك بدقة فائقة مع الخلفية، الزي، والإضاءة السينمائية الفخمة لتنعم بصورة احترافية.</p>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="mt-8 pt-4 border-t border-white/5 text-center">
+                <button onclick="closeTutorialModal()" class="w-full py-3 bg-cinemaGold text-cinemaDark font-bold rounded-xl hover:bg-white transition-all text-xs active:scale-95">
+                    فهمت الخطوات، لنبدأ الإبداع! 🎞️
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة تسجيل الدخول للمشرف (لوحة التحكم) -->
+    <div id="loginModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-cinemaDark/95 backdrop-blur-md hidden transition-all duration-300">
+        <div class="absolute inset-0" onclick="closeLoginModal()"></div>
+        <div class="relative w-full max-w-sm bg-cinemaCard border border-white/5 rounded-2xl p-6 shadow-cinema-premium transform scale-95 opacity-0 transition-all duration-300" id="loginModalContent">
+            <div class="text-center mb-6">
+                <h3 class="text-lg font-semibold text-white">إثبات هوية المخرج</h3>
+                <p class="text-[10px] text-cinemaMuted mt-1">الرجاء إدخال الرمز السري للتحكم الكامل بالأعمال الفنية ورصد الزوار</p>
+            </div>
+            <form onsubmit="verifyAdmin(event)" class="space-y-4">
+                <input type="password" id="passInput" placeholder="الرمز السري..." required class="w-full text-center bg-cinemaDark border border-white/10 rounded-xl py-3 px-4 text-slate-100 placeholder-slate-700 focus:outline-none focus:border-cinemaGold transition-all duration-300 text-sm tracking-widest">
+                <div class="flex gap-2">
+                    <button type="submit" class="flex-grow py-3 bg-cinemaGold text-cinemaDark font-bold rounded-xl transition-all duration-300 text-xs active:scale-95 shadow-md">
+                        تأكيد الصلاحية
+                    </button>
+                    <button type="button" onclick="closeLoginModal()" class="py-3 px-4 bg-cinemaDark border border-white/5 text-slate-400 hover:text-white rounded-xl text-xs">
+                        إلغاء
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- نافذة تعديل الرمز السري للمشرف -->
+    <div id="changePassModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-cinemaDark/95 backdrop-blur-md hidden transition-all duration-300">
+        <div class="absolute inset-0" onclick="closeChangePassModal()"></div>
+        <div class="relative w-full max-w-sm bg-cinemaCard border border-white/5 rounded-2xl p-6 shadow-cinema-premium transform scale-95 opacity-0 transition-all duration-300" id="changePassModalContent">
+            <div class="text-center mb-6">
+                <h3 class="text-lg font-semibold text-white">تعديل رمز المخرج السري</h3>
+                <p class="text-[10px] text-cinemaMuted mt-1">حافظ على سرية الرمز لتأمين معرضك وصورك ورصد الزوار</p>
+            </div>
+            <form onsubmit="saveNewPass(event)" class="space-y-4">
+                <input type="password" id="oldPass" placeholder="الرمز السري الحالي..." required class="w-full text-center bg-cinemaDark border border-white/10 rounded-xl py-2.5 px-4 text-slate-100 placeholder-slate-700 focus:outline-none focus:border-cinemaGold transition-all duration-300 text-xs">
+                <input type="password" id="newPass" placeholder="الرمز السري الجديد..." required class="w-full text-center bg-cinemaDark border border-white/10 rounded-xl py-2.5 px-4 text-slate-100 placeholder-slate-700 focus:outline-none focus:border-cinemaGold transition-all duration-300 text-xs">
+                <div class="flex gap-2">
+                    <button type="submit" class="flex-grow py-3 bg-cinemaGold text-cinemaDark font-bold rounded-xl transition-all duration-300 text-xs active:scale-95">
+                        حفظ الرمز الجديد
+                    </button>
+                    <button type="button" onclick="closeChangePassModal()" class="py-3 px-4 bg-cinemaDark border border-white/5 text-slate-400 hover:text-white rounded-xl text-xs">
+                        تراجع
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- نافذة إضافة وتعديل الأعمال الفنية من الاستوديو مباشرة -->
+    <div id="addModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-cinemaDark/95 backdrop-blur-md hidden transition-all duration-300">
+        <div class="absolute inset-0" onclick="closeAddModal()"></div>
+        <div class="relative w-full max-w-xl bg-cinemaCard border border-white/5 rounded-2xl p-6 md:p-8 shadow-cinema-premium transform scale-95 opacity-0 transition-all duration-300" id="addModalContent">
+            <div class="flex items-center justify-between mb-6">
+                <h3 id="addModalTitle" class="text-lg font-bold text-white">إضافة لقطة سينمائية جديدة</h3>
+                <button onclick="closeAddModal()" class="text-cinemaMuted hover:text-white transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <form id="promptForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
+                <input type="hidden" id="editId">
+                
+                <!-- العنوان -->
+                <div>
+                    <label class="block text-xs text-cinemaMuted mb-1.5 font-medium">عنوان المشهد / اللقطة</label>
+                    <input type="text" id="promptTitle" required placeholder="مثال: لقطة بورتريه بعدسة 85 ملم تحت المطر" class="w-full bg-cinemaDark border border-white/10 rounded-xl py-3 px-4 text-slate-100 placeholder-slate-700 focus:outline-none focus:border-cinemaGold transition-all duration-300 text-sm">
+                </div>
+
+                <!-- هاشتاغ المشهد -->
+                <div>
+                    <label class="block text-xs text-cinemaMuted mb-1.5 font-medium">الهاشتاغ / التصنيف (لتنظيم الأرشيف)</label>
+                    <input type="text" id="promptTag" required placeholder="مثال: تصوير_سينمائي" class="w-full bg-cinemaDark border border-white/10 rounded-xl py-3 px-4 text-slate-100 placeholder-slate-700 focus:outline-none focus:border-cinemaGold transition-all duration-300 text-sm">
+                </div>
+
+                <!-- تحميل الصورة من الاستوديو -->
+                <div>
+                    <label class="block text-xs text-cinemaMuted mb-1.5 font-medium">اختر صورة من الاستوديو الخاص بك</label>
+                    <div class="relative flex items-center justify-center w-full h-32 border border-dashed border-white/10 rounded-xl bg-cinemaDark hover:border-cinemaGold transition-all cursor-pointer">
+                        <input type="file" id="promptFileInput" accept="image/*" onchange="previewSelectedFile(event)" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10">
+                        <div id="uploadPlaceholder" class="text-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8 mx-auto text-cinemaMuted mb-2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                            </svg>
+                            <span class="text-xs text-cinemaMuted block">اضغط لاختيار صورة من معرض الصور</span>
+                        </div>
+                        <!-- معاينة مصغرة سريعة قبل الحفظ -->
+                        <div id="imagePreContainer" class="hidden absolute inset-0 w-full h-full bg-cinemaDark rounded-xl overflow-hidden">
+                            <img id="imagePre" src="" class="w-full h-full object-cover">
+                            <div class="absolute inset-0 bg-black/40 flex items-center justify-center">
+                                <span class="text-xs text-white border border-white/20 bg-black/60 px-3 py-1.5 rounded-lg">تغيير الصورة</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- نص البرومت البرمجي -->
+                <div>
+                    <label class="block text-xs text-cinemaMuted mb-1.5 font-medium">سيناريو أو وصف اللقطة البرمجي (Prompt)</label>
+                    <textarea id="promptText" required rows="4" placeholder="اكتب البرمجة الإبداعية للمشهد بالإنجليزية هنا..." class="w-full bg-cinemaDark border border-white/10 rounded-xl py-3 px-4 text-slate-100 placeholder-slate-700 focus:outline-none focus:border-cinemaGold transition-all duration-300 text-sm resize-none"></textarea>
+                </div>
+
+                <div class="pt-2 flex gap-3">
+                    <button type="submit" id="saveBtn" class="flex-grow py-3 bg-cinemaGold text-cinemaDark font-bold rounded-xl transition-all duration-300 text-xs active:scale-95 shadow-md">
+                        حفظ اللقطة بالسحاب 🌐
+                    </button>
+                    <button type="button" onclick="closeAddModal()" class="py-3 px-6 bg-cinemaDark border border-white/5 text-slate-400 hover:text-white rounded-xl text-xs">
+                        إلغاء
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- نافذة مخصصة بالكامل لتأكيد الحذف (مأمونة من القيود والتعطل) -->
+    <div id="deleteConfirmModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-cinemaDark/95 backdrop-blur-md hidden transition-all duration-300">
+        <div class="absolute inset-0" onclick="closeDeleteModal()"></div>
+        <div class="relative w-full max-w-sm bg-cinemaCard border border-white/5 rounded-2xl p-6 shadow-cinema-premium transform scale-95 opacity-0 transition-all duration-300" id="deleteConfirmContent">
+            <div class="text-center mb-6">
+                <h3 class="text-lg font-bold text-white">أرشفة وحذف اللقطة</h3>
+                <p class="text-[11px] text-cinemaMuted mt-2">هل أنت متأكد من حذف هذه اللقطة من السحاب؟ لا يمكن التراجع عن هذا القرار لاحقاً.</p>
+            </div>
+            <div class="flex gap-2">
+                <button id="confirmDeleteBtn" class="flex-grow py-3 bg-red-800 text-white font-bold rounded-xl hover:bg-red-700 transition-all duration-300 text-xs active:scale-95 shadow-lg">
+                    حذف المشهد نهائياً
+                </button>
+                <button type="button" onclick="closeDeleteModal()" class="py-3 px-4 bg-cinemaDark border border-white/5 text-slate-400 hover:text-white rounded-xl text-xs">
+                    تراجع
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة عرض ومعاينة اللقطة مع التكبير السينمائي المحكم -->
+    <div id="detailModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-cinemaDark/95 backdrop-blur-md hidden transition-all duration-300">
+        <div class="absolute inset-0" onclick="closeDetailModal()"></div>
+        <div class="relative w-full max-w-4xl bg-cinemaCard border border-white/5 rounded-2xl overflow-hidden shadow-cinema-premium flex flex-col md:flex-row transform scale-95 opacity-0 transition-all duration-300" id="detailModalContent">
+            <!-- الصورة وتكبيرها الخاص بالمصور حُر -->
+            <div class="relative w-full md:w-1/2 h-64 md:h-[500px] bg-black overflow-hidden">
+                <img id="detailImg" src="" alt="" class="w-full h-full object-cover select-none transition-transform duration-500 ease-out">
+                <div class="absolute inset-0 bg-gradient-to-t from-cinemaCard via-transparent to-transparent md:bg-gradient-to-r md:from-cinemaCard md:to-transparent"></div>
+                
+                <!-- زر تكبير سينمائي داخلي خاص ومحكم لتجنب زوم المتصفحات -->
+                <button onclick="toggleZoom()" class="absolute bottom-4 right-4 bg-cinemaDark/90 border border-cinemaGold/40 text-cinemaGold p-2.5 rounded-xl hover:bg-white hover:text-cinemaDark transition-all duration-300 shadow-md">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.637 10.637zM10.5 7.5v6m3-3h-6" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- معلومات وتفاصيل البرومت والنسخ -->
+            <div class="w-full md:w-1/2 p-6 md:p-8 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span id="detailTag" class="px-3 py-1 bg-cinemaGold/10 text-cinemaGold border border-cinemaGold/20 rounded-full text-[10px] font-bold">بوابة حُر</span>
+                        <button onclick="closeDetailModal()" class="text-cinemaMuted hover:text-white transition-all">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <h2 id="detailTitle" class="text-xl font-bold text-white mb-4 leading-tight">عنوان البرومت</h2>
+                    
+                    <div class="relative bg-black/40 rounded-xl p-4 border border-white/5">
+                        <h4 class="text-cinemaGold text-[10px] tracking-widest font-bold mb-2 uppercase">البرومت البرمجي (محمي من النسخ اليدوي):</h4>
+                        <div id="detailPromptText" class="text-slate-300 text-xs leading-relaxed overflow-y-auto max-h-48 select-none pr-1"></div>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex flex-col sm:flex-row gap-2">
+                    <button id="detailCopyBtn" onclick="" class="flex-grow py-3.5 bg-cinemaGold text-cinemaDark font-bold rounded-xl transition-all duration-200 flex items-center justify-center gap-2 active:scale-95 text-xs shadow-md">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 7.5V6.108c0-1.135.845-2.098 1.976-2.192.373-.03.748-.057 1.123-.08M15.75 18H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08M15.75 18.75v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5A3.375 3.375 0 006.375 7.5H5.25m11.9-3.664A2.251 2.251 0 0015 2.25h-1.5a2.251 2.251 0 00-2.15 1.586m5.8 0c.065.21.1.433.1.664v.75h-6V4.5c0-.231.035-.454.1-.664M6.75 7.5H4.875c-.621 0-1.125.504-1.125 1.125v12c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V16.5a9 9 0 00-9-9z" />
+                        </svg>
+                        <span>نسخ فوري وتلقائي</span>
+                    </button>
+                    <button id="detailEditBtn" class="hidden py-3.5 px-6 bg-cinemaDark border border-white/10 text-white font-medium rounded-xl hover:border-cinemaGold hover:text-cinemaGold transition-all duration-300 text-xs">
+                        تعديل اللقطة
+                    </button>
+                    <button id="detailDeleteBtn" class="hidden py-3.5 px-6 bg-cinemaDark border border-red-900/40 text-red-400 font-medium rounded-xl hover:bg-red-950 transition-all duration-300 text-xs">
+                        حذف نهائي
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- نظام التنبيهات المضاء بالنيون الفاخر والخفيف -->
+    <div id="toast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 flex items-center gap-3 px-6 py-4 bg-cinemaCard border border-cinemaGold/30 rounded-xl shadow-cinema-premium opacity-0 translate-y-10 pointer-events-none transition-all duration-500">
+        <div class="w-1.5 h-1.5 rounded-full bg-cinemaGold animate-pulse"></div>
+        <p id="toastMsg" class="text-xs font-bold text-slate-100"></p>
+    </div>
+
+    <!-- تذييل معرض حُر -->
+    <footer class="text-center text-cinemaMuted text-[10px] mt-12 space-y-2">
+        <div class="flex items-center justify-center gap-2">
+            <button id="changePassBtn" onclick="openChangePassModal()" class="hidden text-cinemaMuted hover:text-cinemaGold transition-all underline decoration-dotted">تحديث كلمة سر المخرج</button>
+        </div>
+        <p>مخزن حُر الإبداعي المتميز &copy; 2026</p>
+        <p class="text-[8px] text-white/10 tracking-widest uppercase">Secure Cinematic Server Active</p>
+    </footer>
+
+    <!-- شفرة الربط والحفظ السحابي الدائم ورصد إحصائيات الزوار -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // إعدادات وبيانات السحاب الخاصة بالمشروع
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'hor-cinema-premium';
+
+        let user = null;
+        let prompts = [];
+        let adminPassword = "1234"; // الرمز السري الافتراضي للمرة الأولى
+        let isAdmin = false;
+        let deleteTargetId = null;
+        let uploadedImageBase64 = ""; // نخزن الصورة المضغوطة هنا تمهيداً لحفظها بسلاسة
+        let totalViewsCount = 0; // إجمالي عدد الزوار الفعليين من السيرفر السحابي
+
+        // تصدير دوال الجافا سكربت لتكون متاحة دائماً بالواجهة
+        window.openLoginModal = openLoginModal;
+        window.closeLoginModal = closeLoginModal;
+        window.verifyAdmin = verifyAdmin;
+        window.openChangePassModal = openChangePassModal;
+        window.closeChangePassModal = closeChangePassModal;
+        window.saveNewPass = saveNewPass;
+        window.openAddModal = openAddModal;
+        window.closeAddModal = closeAddModal;
+        window.handleFormSubmit = handleFormSubmit;
+        window.openDetailModal = openDetailModal;
+        window.closeDetailModal = closeDetailModal;
+        window.toggleZoom = toggleZoom;
+        window.autoCopyPrompt = autoCopyPrompt;
+        window.filterPrompts = filterPrompts;
+        window.closeDeleteModal = closeDeleteModal;
+        window.previewSelectedFile = previewSelectedFile;
+        window.openTutorialModal = openTutorialModal;
+        window.closeTutorialModal = closeTutorialModal;
+
+        // تهيئة وحماية الاتصال السحابي (Rule 3)
+        const initAuth = async () => {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Auth init issue:", error);
+            }
+        };
+
+        // تفعيل الجلب والاشتراك السحابي الفوري بمجرد تفعيل الاتصال الآمن
+        onAuthStateChanged(auth, async (u) => {
+            if (u) {
+                user = u;
+                await loadAdminConfig();
+                await registerAndTrackVisitor(); // رصد وتسجيل زيارة الزائر الجديد فوراً
+                listenToPrompts();
+            } else {
+                await initAuth();
+            }
+        });
+
+        // جلب رمز الحماية السري المخزن سحابياً
+        async function loadAdminConfig() {
+            try {
+                const configDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'config', 'admin');
+                const docSnap = await getDoc(configDocRef);
+                if (docSnap.exists()) {
+                    adminPassword = docSnap.data().password || "1234";
+                } else {
+                    await setDoc(configDocRef, { password: "1234" });
+                }
+            } catch (e) {
+                console.error("Admin configuration load issue:", e);
+            }
+        }
+
+        // رصد الزوار وتحديث عداد المشاهدات السحابي
+        async function registerAndTrackVisitor() {
+            if (!user) return;
+            try {
+                const statsDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'config', 'stats');
+                const docSnap = await getDoc(statsDocRef);
+                
+                // فحص إذا كانت هناك جلسة زيارة مسجلة محلياً لمنع تكرار الحساب في نفس التصفح
+                const hasVisitedThisSession = sessionStorage.getItem('hor_visited');
+                
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    totalViewsCount = data.views || 0;
+                    
+                    if (!hasVisitedThisSession) {
+                        totalViewsCount += 1;
+                        await updateDoc(statsDocRef, { views: totalViewsCount });
+                        sessionStorage.setItem('hor_visited', 'true');
+                    }
+                } else {
+                    totalViewsCount = 1;
+                    await setDoc(statsDocRef, { views: 1 });
+                    sessionStorage.setItem('hor_visited', 'true');
+                }
+                
+                // استماع فوري لأي تحديث في إحصائيات الزيارات ليعرض للمدير بشكل فوري
+                onSnapshot(statsDocRef, (snap) => {
+                    if (snap.exists()) {
+                        totalViewsCount = snap.data().views || 0;
+                        updateStatsDOM();
+                    }
+                });
+
+            } catch (e) {
+                console.error("Visitor tracking issue:", e);
+            }
+        }
+
+        // تحديث أرقام الإحصائيات المعروضة في لوحة التحكم
+        function updateStatsDOM() {
+            const viewsEl = document.getElementById('statViewsCount');
+            const promptsEl = document.getElementById('statPromptsCount');
+            
+            if (viewsEl) viewsEl.innerText = totalViewsCount.toLocaleString('ar-EG');
+            if (promptsEl) promptsEl.innerText = prompts.length.toLocaleString('ar-EG');
+        }
+
+        // جلب ومراقبة البرومتات من السيرفر مباشرة بشكل حي وبدون بطء (Rule 1 & 2)
+        function listenToPrompts() {
+            if (!user) return;
+            const collectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'prompts');
+            
+            onSnapshot(collectionRef, (snapshot) => {
+                prompts = [];
+                snapshot.forEach(doc => {
+                    prompts.push({ id: doc.id, ...doc.data() });
+                });
+                
+                // إلغاء مؤشرات التحميل وبدء الرندرة المباشرة
+                document.getElementById('loadingState').classList.add('hidden');
+                document.getElementById('promptsGrid').classList.remove('hidden');
+                renderPrompts();
+                updateStatsDOM(); // تحديث عداد البرومتات في اللوحة الإحصائية
+            }, (error) => {
+                showToast("فشل تواصل الخادم السحابي مع المعرض.");
+            });
+        }
+
+        // قراءة ومعاينة الصورة المحددة من الاستوديو محلياً وضغطها لمنع تخطي الحدود المسموحة
+        function previewSelectedFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (!file.type.startsWith('image/')) {
+                showToast("يرجى اختيار ملف صورة صالح 📷");
+                return;
+            }
+
+            const placeholder = document.getElementById('uploadPlaceholder');
+            const previewContainer = document.getElementById('imagePreContainer');
+            const previewImg = document.getElementById('imagePre');
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const imgObj = new Image();
+                imgObj.src = e.target.result;
+                imgObj.onload = function () {
+                    const canvas = document.createElement('canvas');
+                    const maxDim = 800; // أقصى حد للبعد لضمان الجودة الفائقة مع سرعة الرفع السحابي
+                    let w = imgObj.width;
+                    let h = imgObj.height;
+
+                    if (w > maxDim || h > maxDim) {
+                        if (w > h) {
+                            h = Math.round((h * maxDim) / w);
+                            w = maxDim;
+                        } else {
+                            w = Math.round((w * maxDim) / h);
+                            h = maxDim;
+                        }
+                    }
+
+                    canvas.width = w;
+                    canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(imgObj, 0, 0, w, h);
+                    
+                    uploadedImageBase64 = canvas.toDataURL('image/jpeg', 0.75);
+
+                    previewImg.src = uploadedImageBase64;
+                    placeholder.classList.add('hidden');
+                    previewContainer.classList.remove('hidden');
+                };
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // بناء وعرض بطاقات اللقطات بجمال تباين مريح ومطفي
+        function renderPrompts(filteredData = null) {
+            const grid = document.getElementById('promptsGrid');
+            const dataToRender = filteredData || prompts;
+            grid.innerHTML = '';
+
+            if (dataToRender.length === 0) {
+                document.getElementById('noResults').classList.remove('hidden');
+                return;
+            } else {
+                document.getElementById('noResults').classList.add('hidden');
+            }
+
+            const sortedData = [...dataToRender].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+            sortedData.forEach(item => {
+                const safeImg = item.imgUrl || `https://images.unsplash.com/photo-1440404653325-ab127d49abc1?auto=format&fit=crop&q=80&w=600`;
+                
+                const card = document.createElement('div');
+                card.className = "group relative bg-cinemaCard border border-white/5 hover:border-cinemaGold/40 rounded-xl overflow-hidden shadow-lg transition-all duration-300 flex flex-col justify-between";
+                
+                card.innerHTML = `
+                    <div class="relative w-full h-52 bg-black overflow-hidden cursor-pointer" onclick="openDetailModal('${item.id}')">
+                        <img src="${safeImg}" alt="${item.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out select-none" onerror="this.src='https://images.unsplash.com/photo-1440404653325-ab127d49abc1?auto=format&fit=crop&q=80&w=600'">
+                        <div class="absolute inset-0 bg-gradient-to-t from-cinemaCard/90 via-transparent to-transparent"></div>
+                        <span class="absolute top-3 left-3 px-2.5 py-0.5 bg-cinemaDark/90 border border-white/10 text-white/80 rounded-md text-[9px] font-medium tracking-wide">
+                            #${item.category}
+                        </span>
+                    </div>
+
+                    <div class="p-4 flex-grow flex flex-col justify-between">
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-100 group-hover:text-cinemaGold transition-all line-clamp-1 mb-2">${item.title}</h3>
+                            <div class="bg-black/40 border border-white/5 rounded-lg p-3 mb-4 select-none">
+                                <p class="text-[11px] text-cinemaMuted line-clamp-2 leading-relaxed italic select-none">
+                                    "${item.prompt}"
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2 mt-auto">
+                            <button onclick="autoCopyPrompt('${item.id}', this)" class="flex-grow flex items-center justify-center gap-1.5 py-2 px-3 bg-cinemaGold text-cinemaDark text-xs font-bold rounded-lg hover:bg-white transition-all active:scale-95 duration-200">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 7.5V6.108c0-1.135.845-2.098 1.976-2.192.373-.03.748-.057 1.123-.08M15.75 18H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08M15.75 18.75v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5A3.375 3.375 0 006.375 7.5H5.25m11.9-3.664A2.251 2.251 0 0015 2.25h-1.5a2.251 2.251 0 00-2.15 1.586m5.8 0c.065.21.1.433.1.664v.75h-6V4.5c0-.231.035-.454.1-.664M6.75 7.5H4.875c-.621 0-1.125.504-1.125 1.125v12c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V16.5a9 9 0 00-9-9z" />
+                                </svg>
+                                <span>نسخ اللقطة</span>
+                            </button>
+
+                            <button onclick="openDetailModal('${item.id}')" class="p-2 bg-cinemaDark border border-white/5 text-cinemaMuted hover:border-cinemaGold hover:text-cinemaGold rounded-lg transition-all">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // الفلترة الفورية للأرشيف الإبداعي
+        function filterPrompts() {
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            let filtered = prompts;
+
+            if (query !== '') {
+                filtered = prompts.filter(item => 
+                    item.title.toLowerCase().includes(query) || 
+                    item.prompt.toLowerCase().includes(query) || 
+                    item.category.toLowerCase().includes(query)
+                );
+            }
+            renderPrompts(filtered);
+        }
+
+        // نسخ فوري للبرومت بضغطة زر
+        function autoCopyPrompt(id, btn) {
+            const item = prompts.find(p => p.id === id);
+            if (!item) return;
+
+            const temp = document.createElement("textarea");
+            temp.value = item.prompt;
+            temp.setAttribute("readonly", "");
+            temp.style.position = "absolute";
+            temp.style.left = "-9999px";
+            document.body.appendChild(temp);
+            temp.select();
+            
+            let success = false;
+            try {
+                success = document.execCommand('copy');
+            } catch (e) {
+                success = false;
+            }
+            document.body.removeChild(temp);
+
+            if (success) {
+                showToast("تم نسخ الكود بنجاح 📋");
+                if (btn) {
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = `<span>تم النسخ! ✨</span>`;
+                    btn.style.background = '#ffffff';
+                    btn.style.color = '#0a0a0c';
+                    setTimeout(() => {
+                        btn.innerHTML = originalText;
+                        btn.style.background = '';
+                        btn.style.color = '';
+                    }, 2000);
+                }
+            } else {
+                showToast("فشلت عملية النسخ التلقائي.");
+            }
+        }
+
+        // إدارة لوحة الدليل التعليمي التفاعلي
+        function openTutorialModal() {
+            const modal = document.getElementById('tutorialModal');
+            const content = document.getElementById('tutorialModalContent');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeTutorialModal() {
+            const modal = document.getElementById('tutorialModal');
+            const content = document.getElementById('tutorialModalContent');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        // النوافذ وإدارة لوحة المخرج والتحكم
+        function openLoginModal() {
+            if (isAdmin) {
+                isAdmin = false;
+                updateAdminUI();
+                showToast("تم إغلاق لوحة المخرج بنجاح.");
+                return;
+            }
+            const modal = document.getElementById('loginModal');
+            const content = document.getElementById('loginModalContent');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeLoginModal() {
+            const modal = document.getElementById('loginModal');
+            const content = document.getElementById('loginModalContent');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        function verifyAdmin(e) {
+            e.preventDefault();
+            const val = document.getElementById('passInput').value;
+            if (val === adminPassword) {
+                isAdmin = true;
+                updateAdminUI();
+                closeLoginModal();
+                showToast("مرحباً بك مجدداً يا حُر 🔑");
+            } else {
+                showToast("الرمز السري غير صالح! ❌");
+            }
+        }
+
+        function openChangePassModal() {
+            const modal = document.getElementById('changePassModal');
+            const content = document.getElementById('changePassModalContent');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeChangePassModal() {
+            const modal = document.getElementById('changePassModal');
+            const content = document.getElementById('changePassModalContent');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        async function saveNewPass(e) {
+            e.preventDefault();
+            const oldVal = document.getElementById('oldPass').value;
+            const newVal = document.getElementById('newPass').value;
+
+            if (oldVal === adminPassword) {
+                adminPassword = newVal;
+                try {
+                    const configDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'config', 'admin');
+                    await setDoc(configDocRef, { password: newVal });
+                    showToast("تم تحديث رمز المخرج بنجاح 🔒");
+                    closeChangePassModal();
+                } catch (err) {
+                    showToast("فشلت عملية الحفظ السحابي للرمز.");
+                }
+            } else {
+                showToast("الرمز الحالي المدخل غير صحيح ❌");
+            }
+        }
+
+        function updateAdminUI() {
+            const badge = document.getElementById('adminBadge');
+            const authBtnText = document.getElementById('authBtnText');
+            const addBtn = document.getElementById('addBtn');
+            const changePassBtn = document.getElementById('changePassBtn');
+            const adminStatsPanel = document.getElementById('adminStatsPanel');
+
+            if (isAdmin) {
+                badge.classList.remove('hidden');
+                authBtnText.innerText = "خروج المخرج";
+                addBtn.classList.remove('hidden');
+                changePassBtn.classList.remove('hidden');
+                adminStatsPanel.classList.remove('hidden'); // إظهار لوحة إحصائيات الزوار
+            } else {
+                badge.classList.add('hidden');
+                authBtnText.innerText = "دخول المخرج";
+                addBtn.classList.add('hidden');
+                changePassBtn.classList.add('hidden');
+                adminStatsPanel.classList.add('hidden'); // إخفاء لوحة إحصائيات الزوار للعموم
+            }
+            renderPrompts();
+            updateStatsDOM();
+        }
+
+        // التحكم بإضافة وتعديل اللقطة
+        function openAddModal(editId = null) {
+            if (!isAdmin) return;
+            const modal = document.getElementById('addModal');
+            const content = document.getElementById('addModalContent');
+            
+            document.getElementById('promptForm').reset();
+            document.getElementById('editId').value = "";
+            uploadedImageBase64 = "";
+
+            document.getElementById('uploadPlaceholder').classList.remove('hidden');
+            document.getElementById('imagePreContainer').classList.add('hidden');
+            document.getElementById('imagePre').src = "";
+
+            document.getElementById('addModalTitle').innerText = "إضافة لقطة فنية جديدة";
+            document.getElementById('saveBtn').innerText = "حفظ اللقطة بالسحاب 🌐";
+
+            if (editId) {
+                const item = prompts.find(p => p.id === editId);
+                if (item) {
+                    document.getElementById('editId').value = item.id;
+                    document.getElementById('promptTitle').value = item.title;
+                    document.getElementById('promptTag').value = item.category;
+                    document.getElementById('promptText').value = item.prompt;
+                    
+                    if (item.imgUrl) {
+                        uploadedImageBase64 = item.imgUrl;
+                        document.getElementById('imagePre').src = item.imgUrl;
+                        document.getElementById('uploadPlaceholder').classList.add('hidden');
+                        document.getElementById('imagePreContainer').classList.remove('hidden');
+                    }
+
+                    document.getElementById('addModalTitle').innerText = "تعديل لقطة سحابية";
+                    document.getElementById('saveBtn').innerText = "حفظ التعديلات الحالية";
+                }
+            }
+
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeAddModal() {
+            const modal = document.getElementById('addModal');
+            const content = document.getElementById('addModalContent');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        // إرسال البيانات وحفظها في السحاب
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+            if (!isAdmin || !user) return;
+
+            const id = document.getElementById('editId').value;
+            const title = document.getElementById('promptTitle').value.trim();
+            const category = document.getElementById('promptTag').value.trim();
+            const promptText = document.getElementById('promptText').value.trim();
+
+            const finalImgUrl = uploadedImageBase64 || `https://images.unsplash.com/photo-1440404653325-ab127d49abc1?auto=format&fit=crop&q=80&w=600`;
+
+            try {
+                const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'prompts');
+                if (id) {
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'prompts', id);
+                    await updateDoc(docRef, {
+                        title,
+                        category,
+                        imgUrl: finalImgUrl,
+                        prompt: promptText
+                    });
+                    showToast("تم تحديث اللقطة في السيرفر السحابي! 💫");
+                } else {
+                    await addDoc(colRef, {
+                        title,
+                        category,
+                        imgUrl: finalImgUrl,
+                        prompt: promptText,
+                        createdAt: Date.now()
+                    });
+                    showToast("تم حفظ اللقطة الجديدة بنجاح في السحاب! 🎞️");
+                }
+                closeAddModal();
+            } catch (err) {
+                showToast("فشلت عملية المزامنة وحفظ اللقطة.");
+            }
+        }
+
+        // نافذة التفاصيل وعرض اللقطة
+        let isZoomed = false;
+        function openDetailModal(id) {
+            const item = prompts.find(p => p.id === id);
+            if (!item) return;
+
+            const modal = document.getElementById('detailModal');
+            const content = document.getElementById('detailModalContent');
+            const img = document.getElementById('detailImg');
+
+            img.style.transform = "scale(1)";
+            isZoomed = false;
+
+            document.getElementById('detailTitle').innerText = item.title;
+            document.getElementById('detailTag').innerText = "#" + item.category;
+            document.getElementById('detailPromptText').innerText = item.prompt;
+            img.src = item.imgUrl || `https://images.unsplash.com/photo-1440404653325-ab127d49abc1?auto=format&fit=crop&q=80&w=600`;
+
+            document.getElementById('detailCopyBtn').onclick = (e) => {
+                autoCopyPrompt(item.id, e.currentTarget);
+            };
+
+            const editBtn = document.getElementById('detailEditBtn');
+            const deleteBtn = document.getElementById('detailDeleteBtn');
+
+            if (isAdmin) {
+                editBtn.classList.remove('hidden');
+                deleteBtn.classList.remove('hidden');
+
+                editBtn.onclick = () => {
+                    closeDetailModal();
+                    openAddModal(item.id);
+                };
+
+                deleteBtn.onclick = () => {
+                    closeDetailModal();
+                    openDeleteModal(item.id);
+                };
+            } else {
+                editBtn.classList.add('hidden');
+                deleteBtn.classList.add('hidden');
+            }
+
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeDetailModal() {
+            const modal = document.getElementById('detailModal');
+            const content = document.getElementById('detailModalContent');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        // تكبير وتقريب الصورة داخلياً لإلغاء زوم المتصفح الفوضوي
+        function toggleZoom() {
+            const img = document.getElementById('detailImg');
+            if (isZoomed) {
+                img.style.transform = "scale(1)";
+                isZoomed = false;
+            } else {
+                img.style.transform = "scale(1.4)";
+                isZoomed = true;
+                showToast("تكبير تفاصيل اللقطة السينمائية 🔍");
+            }
+        }
+
+        // نافذة تأكيد الحذف المصممة ذاتياً بالكامل
+        function openDeleteModal(id) {
+            deleteTargetId = id;
+            const modal = document.getElementById('deleteConfirmModal');
+            const content = document.getElementById('deleteConfirmContent');
+
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+
+            document.getElementById('confirmDeleteBtn').onclick = async () => {
+                if (deleteTargetId) {
+                    try {
+                        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'prompts', deleteTargetId);
+                        await deleteDoc(docRef);
+                        showToast("تم إزالة اللقطة بنجاح من الخادم السحابي 🗑️");
+                        closeDeleteModal();
+                    } catch (err) {
+                        showToast("فشلت عملية الحذف السحابي.");
+                    }
+                }
+            };
+        }
+
+        function closeDeleteModal() {
+            deleteTargetId = null;
+            const modal = document.getElementById('deleteConfirmModal');
+            const content = document.getElementById('deleteConfirmContent');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        // إظهار توست التنبيه الفاخر والمبسط
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = message;
+            toast.classList.remove('opacity-0', 'translate-y-10', 'pointer-events-none');
+            toast.classList.add('opacity-100', 'translate-y-0');
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-10', 'pointer-events-none');
+                toast.classList.remove('opacity-100', 'translate-y-0');
+            }, 3000);
+        }
+
+        // إلغاء كلي للنسخ العشوائي والتفاعلات الخاطئة بالموقع
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('keydown', e => {
+            if (e.ctrlKey && (e.key === 'c' || e.key === 'v' || e.key === 'u' || e.key === 's' || e.key === 'a' || e.key === 'x')) {
+                e.preventDefault();
+            }
+        });
+    </script>
+</body>
+</html>
+
+```
+
