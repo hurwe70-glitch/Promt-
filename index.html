@@ -113,7 +113,7 @@
         <section id="adminStatsPanel" class="hidden mb-8 p-6 bg-cinemaCard border border-cinemaGold/20 rounded-2xl shadow-cinema-gold-glow">
             <div class="flex items-center justify-between mb-4 pb-3 border-b border-white/5">
                 <h2 class="text-sm font-bold text-cinemaGold tracking-wider uppercase">لوحة تحكم وإحصائيات المعرض</h2>
-                <span class="text-[10px] text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">متصل سحابياً</span>
+                <span id="storageModeBadge" class="text-[10px] text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">نشط سحابياً</span>
             </div>
             <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                 <!-- إحصائية عدد الزوار والزيارات الفعلي -->
@@ -128,7 +128,7 @@
                 </div>
                 <!-- إرشاد سريع للمخرج -->
                 <div class="hidden md:flex bg-black/20 p-4 rounded-xl border border-white/5 flex-col justify-center items-center text-center">
-                    <p class="text-[10px] text-cinemaMuted leading-relaxed">البيانات تُحدّث تلقائياً وفورياً بمجرد دخول أي زائر جديد للمعرض.</p>
+                    <p class="text-[10px] text-cinemaMuted leading-relaxed">البيانات تُحدّث تلقائياً وفورياً لزوار موقعك الإبداعي.</p>
                 </div>
             </div>
         </section>
@@ -226,7 +226,7 @@
                         <p class="text-xs text-cinemaMuted">اكتب الصيغة التالية باللغة العربية للذكاء الاصطناعي متبوعة بالبرومت المنسوخ:</p>
                         
                         <!-- صندوق نسخ الأمر المساعد الجاهز -->
-                        <div class="bg-black/60 p-3 rounded-lg border border-white/5 relative">
+                        <div class="bg-black/60 p-3 rounded-lg border border-white/5 relative font-sans">
                             <p class="text-[11px] text-slate-300 leading-relaxed leading-5">
 "باستخدام هذه الصورة المرفقة كمرجع أساسي للملامح والهوية، والقصة، وبنية الشعر ولون البشرة والمظهر العام بدقة فائقة. يرجى محاكاتها وتوليد لقطة جديدة تماماً بموجب الوصف البرمجي التالي: 
 [ألصق هنا البرومت الذي نسخته من التطبيق]"
@@ -455,26 +455,44 @@
         <p class="text-[8px] text-white/10 tracking-widest uppercase">Secure Cinematic Server Active</p>
     </footer>
 
-    <!-- شفرة الربط والحفظ السحابي الدائم ورصد إحصائيات الزوار -->
+    <!-- شفرة الربط والحفظ التفاعلية والتحول المحلي المرن في حال تعطل البيئة الخارجية -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // إعدادات وبيانات السحاب الخاصة بالمشروع
-        const firebaseConfig = JSON.parse(__firebase_config);
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'hor-cinema-premium';
+        // اللقطات الافتراضية عالية الجودة لبدء التشغيل بشكل فوري
+        const defaultLocalPrompts = [
+            {
+                id: "initial_1",
+                title: "فتاة المستقبل بعدسة بورتريه سينمائية",
+                category: "خيال_علمي",
+                imgUrl: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=800",
+                prompt: "A gorgeous cyber-enhanced female portrait, cinematic moody lighting, golden reflections, fine hair details, shot on Arri Alexa, 85mm lens, photorealistic masterpiece.",
+                createdAt: 1710000000000
+            },
+            {
+                id: "initial_2",
+                title: "بوابة الضوء السحرية في الغابة الغامضة",
+                category: "طبيعة_سحرية",
+                imgUrl: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&q=80&w=800",
+                prompt: "An ancient glowing portal made of stone standing in the middle of a dense dark forest, golden ethereal light leaking, magical realism, epic landscape photography.",
+                createdAt: 1710000001000
+            }
+        ];
+
+        let db = null;
+        let auth = null;
+        let appId = 'hor-cinema-premium';
+        let isFirebaseActive = false; // تتبع نشاط الاتصال بالسحابة
 
         let user = null;
         let prompts = [];
-        let adminPassword = "1234"; // الرمز السري الافتراضي للمرة الأولى
+        let adminPassword = "1234"; // الرمز السري الافتراضي
         let isAdmin = false;
         let deleteTargetId = null;
-        let uploadedImageBase64 = ""; // نخزن الصورة المضغوطة هنا تمهيداً لحفظها بسلاسة
-        let totalViewsCount = 0; // إجمالي عدد الزوار الفعليين من السيرفر السحابي
+        let uploadedImageBase64 = ""; 
+        let totalViewsCount = 0; 
 
         // تصدير دوال الجافا سكربت لتكون متاحة دائماً بالواجهة
         window.openLoginModal = openLoginModal;
@@ -496,33 +514,100 @@
         window.openTutorialModal = openTutorialModal;
         window.closeTutorialModal = closeTutorialModal;
 
-        // تهيئة وحماية الاتصال السحابي (Rule 3)
-        const initAuth = async () => {
+        // تأسيس نظام الاتصال: تحول مرن وحماية من التعليق نهائياً
+        const setupPlatform = async () => {
+            // محاولة التحقق من تهيئة السحابة بنجاح
             try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
+                if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+                    const firebaseConfig = JSON.parse(__firebase_config);
+                    const app = initializeApp(firebaseConfig);
+                    auth = getAuth(app);
+                    db = getFirestore(app);
+                    appId = typeof __app_id !== 'undefined' ? __app_id : 'hor-cinema-premium';
+                    isFirebaseActive = true;
+
+                    // بدء المصادقة السحابية
+                    onAuthStateChanged(auth, async (u) => {
+                        if (u) {
+                            user = u;
+                            await loadAdminConfig();
+                            await registerAndTrackVisitor(); 
+                            listenToPrompts();
+                        } else {
+                            await initAuth();
+                        }
+                    });
                 } else {
-                    await signInAnonymously(auth);
+                    throw new Error("Local fallback mode triggered.");
                 }
-            } catch (error) {
-                console.error("Auth init issue:", error);
+            } catch (err) {
+                console.warn("Switching to offline-first secure memory local mode:", err);
+                isFirebaseActive = false;
+                loadLocalDatabase();
             }
         };
 
-        // تفعيل الجلب والاشتراك السحابي الفوري بمجرد تفعيل الاتصال الآمن
-        onAuthStateChanged(auth, async (u) => {
-            if (u) {
-                user = u;
-                await loadAdminConfig();
-                await registerAndTrackVisitor(); // رصد وتسجيل زيارة الزائر الجديد فوراً
-                listenToPrompts();
-            } else {
-                await initAuth();
+        // المصادقة السحابية الافتراضية الآمنة
+        const initAuth = async () => {
+            try {
+                if (auth) {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                }
+            } catch (error) {
+                console.error("Auth init failure, activating fallback local mode.");
+                isFirebaseActive = false;
+                loadLocalDatabase();
             }
-        });
+        };
+
+        // تحميل تهيئة وحفظ النظام المحلي الآمن في حال عدم توفر السحابة بالفروع الخارجية
+        function loadLocalDatabase() {
+            // جلب البرومتات المخزنة محلياً
+            const savedLocalPrompts = localStorage.getItem('hor_local_prompts');
+            if (savedLocalPrompts) {
+                prompts = JSON.parse(savedLocalPrompts);
+            } else {
+                prompts = [...defaultLocalPrompts];
+                localStorage.setItem('hor_local_prompts', JSON.stringify(prompts));
+            }
+
+            // جلب إعدادات المشرف والرمز السري
+            const savedLocalPass = localStorage.getItem('hor_local_admin_pass');
+            if (savedLocalPass) {
+                adminPassword = savedLocalPass;
+            } else {
+                adminPassword = "1234";
+                localStorage.setItem('hor_local_admin_pass', adminPassword);
+            }
+
+            // جلب وحساب الزيارات
+            let localViews = parseInt(localStorage.getItem('hor_local_views') || "0");
+            const hasVisitedSession = sessionStorage.getItem('hor_local_visited');
+            if (!hasVisitedSession) {
+                localViews += 1;
+                localStorage.setItem('hor_local_views', localViews.toString());
+                sessionStorage.setItem('hor_local_visited', 'true');
+            }
+            totalViewsCount = localViews;
+
+            // تحديث الواجهة والتشغيل السلس فوراً وبدون أي تعليق
+            document.getElementById('storageModeBadge').innerText = "وضع الذاكرة المحلية النشط";
+            document.getElementById('storageModeBadge').className = "text-[10px] text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-full border border-amber-500/20";
+            
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('promptsGrid').classList.remove('hidden');
+            
+            renderPrompts();
+            updateStatsDOM();
+        }
 
         // جلب رمز الحماية السري المخزن سحابياً
         async function loadAdminConfig() {
+            if (!isFirebaseActive || !db) return;
             try {
                 const configDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'config', 'admin');
                 const docSnap = await getDoc(configDocRef);
@@ -532,18 +617,19 @@
                     await setDoc(configDocRef, { password: "1234" });
                 }
             } catch (e) {
-                console.error("Admin configuration load issue:", e);
+                console.error("Firebase config load issue:", e);
+                isFirebaseActive = false;
+                loadLocalDatabase();
             }
         }
 
         // رصد الزوار وتحديث عداد المشاهدات السحابي
         async function registerAndTrackVisitor() {
-            if (!user) return;
+            if (!isFirebaseActive || !db || !user) return;
             try {
                 const statsDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'config', 'stats');
                 const docSnap = await getDoc(statsDocRef);
                 
-                // فحص إذا كانت هناك جلسة زيارة مسجلة محلياً لمنع تكرار الحساب في نفس التصفح
                 const hasVisitedThisSession = sessionStorage.getItem('hor_visited');
                 
                 if (docSnap.exists()) {
@@ -561,7 +647,7 @@
                     sessionStorage.setItem('hor_visited', 'true');
                 }
                 
-                // استماع فوري لأي تحديث في إحصائيات الزيارات ليعرض للمدير بشكل فوري
+                // استماع فوري لأي تحديث في إحصائيات الزيارات
                 onSnapshot(statsDocRef, (snap) => {
                     if (snap.exists()) {
                         totalViewsCount = snap.data().views || 0;
@@ -583,9 +669,9 @@
             if (promptsEl) promptsEl.innerText = prompts.length.toLocaleString('ar-EG');
         }
 
-        // جلب ومراقبة البرومتات من السيرفر مباشرة بشكل حي وبدون بطء (Rule 1 & 2)
+        // جلب ومراقبة البرومتات من السيرفر مباشرة
         function listenToPrompts() {
-            if (!user) return;
+            if (!isFirebaseActive || !db || !user) return;
             const collectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'prompts');
             
             onSnapshot(collectionRef, (snapshot) => {
@@ -594,17 +680,18 @@
                     prompts.push({ id: doc.id, ...doc.data() });
                 });
                 
-                // إلغاء مؤشرات التحميل وبدء الرندرة المباشرة
                 document.getElementById('loadingState').classList.add('hidden');
                 document.getElementById('promptsGrid').classList.remove('hidden');
                 renderPrompts();
-                updateStatsDOM(); // تحديث عداد البرومتات في اللوحة الإحصائية
+                updateStatsDOM(); 
             }, (error) => {
-                showToast("فشل تواصل الخادم السحابي مع المعرض.");
+                console.warn("Firestore listener failed, fallback to local storage database:", error);
+                isFirebaseActive = false;
+                loadLocalDatabase();
             });
         }
 
-        // قراءة ومعاينة الصورة المحددة من الاستوديو محلياً وضغطها لمنع تخطي الحدود المسموحة
+        // قراءة ومعاينة الصورة المحددة من الاستوديو محلياً وضغطها
         function previewSelectedFile(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -624,7 +711,7 @@
                 imgObj.src = e.target.result;
                 imgObj.onload = function () {
                     const canvas = document.createElement('canvas');
-                    const maxDim = 800; // أقصى حد للبعد لضمان الجودة الفائقة مع سرعة الرفع السحابي
+                    const maxDim = 800; 
                     let w = imgObj.width;
                     let h = imgObj.height;
 
@@ -653,7 +740,7 @@
             reader.readAsDataURL(file);
         }
 
-        // بناء وعرض بطاقات اللقطات بجمال تباين مريح ومطفي
+        // بناء وعرض بطاقات اللقطات
         function renderPrompts(filteredData = null) {
             const grid = document.getElementById('promptsGrid');
             const dataToRender = filteredData || prompts;
@@ -851,8 +938,12 @@
             if (oldVal === adminPassword) {
                 adminPassword = newVal;
                 try {
-                    const configDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'config', 'admin');
-                    await setDoc(configDocRef, { password: newVal });
+                    if (isFirebaseActive && db) {
+                        const configDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'config', 'admin');
+                        await setDoc(configDocRef, { password: newVal });
+                    } else {
+                        localStorage.setItem('hor_local_admin_pass', newVal);
+                    }
                     showToast("تم تحديث رمز المخرج بنجاح 🔒");
                     closeChangePassModal();
                 } catch (err) {
@@ -875,13 +966,13 @@
                 authBtnText.innerText = "خروج المخرج";
                 addBtn.classList.remove('hidden');
                 changePassBtn.classList.remove('hidden');
-                adminStatsPanel.classList.remove('hidden'); // إظهار لوحة إحصائيات الزوار
+                adminStatsPanel.classList.remove('hidden'); 
             } else {
                 badge.classList.add('hidden');
                 authBtnText.innerText = "دخول المخرج";
                 addBtn.classList.add('hidden');
                 changePassBtn.classList.add('hidden');
-                adminStatsPanel.classList.add('hidden'); // إخفاء لوحة إحصائيات الزوار للعموم
+                adminStatsPanel.classList.add('hidden'); 
             }
             renderPrompts();
             updateStatsDOM();
@@ -939,10 +1030,10 @@
             setTimeout(() => modal.classList.add('hidden'), 300);
         }
 
-        // إرسال البيانات وحفظها في السحاب
+        // إرسال البيانات وحفظها في السحاب أو محلياً عند الطوارئ
         async function handleFormSubmit(e) {
             e.preventDefault();
-            if (!isAdmin || !user) return;
+            if (!isAdmin) return;
 
             const id = document.getElementById('editId').value;
             const title = document.getElementById('promptTitle').value.trim();
@@ -952,25 +1043,57 @@
             const finalImgUrl = uploadedImageBase64 || `https://images.unsplash.com/photo-1440404653325-ab127d49abc1?auto=format&fit=crop&q=80&w=600`;
 
             try {
-                const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'prompts');
-                if (id) {
-                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'prompts', id);
-                    await updateDoc(docRef, {
-                        title,
-                        category,
-                        imgUrl: finalImgUrl,
-                        prompt: promptText
-                    });
-                    showToast("تم تحديث اللقطة في السيرفر السحابي! 💫");
+                if (isFirebaseActive && db && user) {
+                    // الحفظ السحابي
+                    const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'prompts');
+                    if (id) {
+                        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'prompts', id);
+                        await updateDoc(docRef, {
+                            title,
+                            category,
+                            imgUrl: finalImgUrl,
+                            prompt: promptText
+                        });
+                        showToast("تم تحديث اللقطة في السيرفر السحابي! 💫");
+                    } else {
+                        await addDoc(colRef, {
+                            title,
+                            category,
+                            imgUrl: finalImgUrl,
+                            prompt: promptText,
+                            createdAt: Date.now()
+                        });
+                        showToast("تم حفظ اللقطة الجديدة بنجاح في السحاب! 🎞️");
+                    }
                 } else {
-                    await addDoc(colRef, {
-                        title,
-                        category,
-                        imgUrl: finalImgUrl,
-                        prompt: promptText,
-                        createdAt: Date.now()
-                    });
-                    showToast("تم حفظ اللقطة الجديدة بنجاح في السحاب! 🎞️");
+                    // الحفظ المحلي الاحتياطي
+                    if (id) {
+                        const index = prompts.findIndex(p => p.id === id);
+                        if (index !== -1) {
+                            prompts[index] = {
+                                ...prompts[index],
+                                title,
+                                category,
+                                imgUrl: finalImgUrl,
+                                prompt: promptText
+                            };
+                            showToast("تم التحديث بنجاح محلياً! 💫");
+                        }
+                    } else {
+                        const newPrompt = {
+                            id: Date.now().toString(),
+                            title,
+                            category,
+                            imgUrl: finalImgUrl,
+                            prompt: promptText,
+                            createdAt: Date.now()
+                        };
+                        prompts.unshift(newPrompt);
+                        showToast("تم الحفظ بنجاح محلياً! 🎞️");
+                    }
+                    localStorage.setItem('hor_local_prompts', JSON.stringify(prompts));
+                    renderPrompts();
+                    updateStatsDOM();
                 }
                 closeAddModal();
             } catch (err) {
@@ -1064,9 +1187,17 @@
             document.getElementById('confirmDeleteBtn').onclick = async () => {
                 if (deleteTargetId) {
                     try {
-                        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'prompts', deleteTargetId);
-                        await deleteDoc(docRef);
-                        showToast("تم إزالة اللقطة بنجاح من الخادم السحابي 🗑️");
+                        if (isFirebaseActive && db) {
+                            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'prompts', deleteTargetId);
+                            await deleteDoc(docRef);
+                            showToast("تم إزالة اللقطة بنجاح من الخادم السحابي 🗑️");
+                        } else {
+                            prompts = prompts.filter(p => p.id !== deleteTargetId);
+                            localStorage.setItem('hor_local_prompts', JSON.stringify(prompts));
+                            showToast("تم حذف اللقطة بنجاح محلياً 🗑️");
+                            renderPrompts();
+                            updateStatsDOM();
+                        }
                         closeDeleteModal();
                     } catch (err) {
                         showToast("فشلت عملية الحذف السحابي.");
@@ -1104,6 +1235,9 @@
                 e.preventDefault();
             }
         });
+
+        // تشغيل البنية التأسيسية للتطبيق عند التحميل فوراً
+        setupPlatform();
     </script>
 </body>
 </html>
